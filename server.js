@@ -6,9 +6,9 @@ const path = require('path');
 const cheerio = require('cheerio');
 const multer = require('multer');
 const cors = require('cors');
-app.use(cors());
 
 const app = express();
+app.use(cors());
 const PORT = 3000;
 
 // MongoDB 연결
