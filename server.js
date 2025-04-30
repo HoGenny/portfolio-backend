@@ -5,6 +5,8 @@ const fs = require('fs');
 const path = require('path');
 const cheerio = require('cheerio');
 const multer = require('multer');
+const cors = require('cors');
+app.use(cors());
 
 const app = express();
 const PORT = 3000;
