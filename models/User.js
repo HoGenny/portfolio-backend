@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
   realname: { type: String, required: true },
   birthdate: { type: Date, required: true },
   bio: { type: String, default: '' },
-  profilePic: { type: String, default: '' }
+  profilePic: { type: String, default: '/static/images/default-profile.png' }
 }, {
   timestamps: true,
 });
