@@ -164,7 +164,7 @@ app.post('/api/portfolios', async (req, res) => {
       });
       await newPortfolio.save();
       
-      res.json({ message: '포트폴리오가 생성되었습니다!', link: `/portfolios/${filename}` });
+      res.json({ message: '포트폴리오가 생성되었습니다!', link: s3Url });
     } catch (err) {
       console.error('포트폴리오 저장 오류:', err);
       res.status(500).json({ message: '서버 에러가 발생했습니다.' });
