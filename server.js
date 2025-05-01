@@ -42,6 +42,9 @@ app.listen(PORT, () => {
 });
 
 async function uploadToS3(filename, htmlContent) {
+  console.log("✅ S3 Bucket:", `"${process.env.S3_BUCKET_NAME}"`);
+  console.log("✅ All env:", process.env);
+
   const params = {
     Bucket: process.env.S3_BUCKET_NAME,
     Key: `portfolios/${filename}`,
@@ -364,8 +367,3 @@ app.post('/upload-profile', upload.single('profilePic'), (req, res) => {
     const fileUrl = `/uploads/${req.file.filename}`;
     res.json({ message: '업로드 성공', url: fileUrl });
   });
-  
-
-
-console.log("✅ S3 Bucket:", `"${process.env.S3_BUCKET_NAME}"`);
-console.log("✅ All env:", process.env);
