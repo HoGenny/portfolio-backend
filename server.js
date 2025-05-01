@@ -298,45 +298,69 @@ app.post('/users/login', async (req, res) => {
   
 
 // 포트폴리오 삭제 API
-app.delete('/api/portfolios/:filename', (req, res) => {
+app.delete('/api/portfolios/:filename', async (req, res) => {
   const { filename } = req.params;
 
-  const filePath = path.join(__dirname, 'public/portfolios', filename);
+  const params = {
+    Bucket: process.env.S3_BUCKET_NAME,
+    Key: `portfolios/${filename}`,
+  };
 
-  fs.unlink(filePath, (err) => {
-    if (err) {
-      console.error('포트폴리오 삭제 실패:', err);
-      return res.status(500).json({ message: '파일 삭제 중 오류 발생' });
-    }
+  try {
+    await s3.deleteObject(params).promise();
+
+    // MongoDB에서도 삭제
+    await Portfolio.deleteOne({ filename });
 
     res.json({ message: '포트폴리오가 삭제되었습니다.' });
-  });
+  } catch (err) {
+    console.error('포트폴리오 삭제 실패:', err);
+    res.status(500).json({ message: 'S3 또는 DB 삭제 중 오류 발생' });
+  }
 });
 
 // 포트폴리오 내용 불러오기
-app.get('/api/portfolios/:filename', (req, res) => {
-  const filePath = path.join(__dirname, 'public/portfolios', req.params.filename);
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).json({ message: '파일을 찾을 수 없습니다.' });
+app.get('/api/portfolios/:filename', async (req, res) => {
+  const filename = req.params.filename;
+
+  const params = {
+    Bucket: process.env.S3_BUCKET_NAME,
+    Key: `portfolios/${filename}`,
+  };
+
+  try {
+    const data = await s3.getObject(params).promise();
+    res.set('Content-Type', 'text/html');
+    res.send(data.Body.toString('utf-8'));
+  } catch (err) {
+    console.error('포트폴리오 로딩 실패:', err);
+    res.status(404).json({ message: '파일을 찾을 수 없습니다.' });
   }
-  const html = fs.readFileSync(filePath, 'utf8');
-  res.send(html); // HTML 그대로 반환
 });
 
 // 포트폴리오 내용 수정
-app.put('/api/portfolios/:filename', (req, res) => {
-  const filePath = path.join(__dirname, 'public/portfolios', req.params.filename);
+app.put('/api/portfolios/:filename', async (req, res) => {
+  const { filename } = req.params;
   const { html } = req.body;
 
-  if (!html) return res.status(400).json({ message: '수정할 내용이 없습니다.' });
+  if (!html) {
+    return res.status(400).json({ message: '수정할 내용이 없습니다.' });
+  }
 
-  fs.writeFile(filePath, html, (err) => {
-    if (err) {
-      console.error('파일 저장 오류:', err);
-      return res.status(500).json({ message: '파일 저장 중 오류 발생' });
-    }
+  const params = {
+    Bucket: process.env.S3_BUCKET_NAME,
+    Key: `portfolios/${filename}`,
+    Body: html,
+    ContentType: 'text/html'
+  };
+
+  try {
+    await s3.putObject(params).promise();
     res.json({ message: '포트폴리오가 성공적으로 수정되었습니다.' });
-  });
+  } catch (err) {
+    console.error('S3 파일 수정 오류:', err);
+    res.status(500).json({ message: '파일 저장 중 오류 발생' });
+  }
 });
 
 // 사용자 프로필 업데이트 API
