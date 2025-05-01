@@ -37,9 +37,9 @@ app.listen(PORT, () => {
 });
 
 // 포트폴리오 저장 API
-app.post('/portfolios', async (req, res) => {
+app.post('/api/portfolios', async (req, res) => {
     try {
-      const { name, bio, skills, projects, email, github, blog, message } = req.body;
+      const { username, name, bio, skills, projects, email, github, blog, message } = req.body;
       if (!name || !bio || !skills || !projects || !email) {
         return res.status(400).json({ message: '필수 입력값이 부족합니다.' });
       }
