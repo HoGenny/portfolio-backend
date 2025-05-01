@@ -52,7 +52,7 @@ async function uploadToS3(filename, htmlContent) {
     Key: `portfolios/${filename}`,
     Body: htmlContent,
     ContentType: 'text/html',
-    ACL: 'public-read' // 공개 URL로 접근 가능하게
+    //ACL: 'public-read' // 공개 URL로 접근 가능하게
   };
 
   await s3.putObject(params).promise();
