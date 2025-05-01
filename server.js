@@ -63,12 +63,17 @@ async function uploadToS3(filename, htmlContent) {
 
 // 포트폴리오 저장 API
 app.post('/api/portfolios', async (req, res) => {
+    console.log("📨 POST /api/portfolios 진입");
+    console.log("📦 받은 데이터:", req.body);
+
     try {
       const { username, name, bio, skills, projects, email, github, blog, message } = req.body;
       if (!name || !bio || !skills || !projects || !email) {
         return res.status(400).json({ message: '필수 입력값이 부족합니다.' });
       }
-  
+      
+      console.log("✅ 필드 통과, HTML 생성 시작");
+
       const htmlContent = `<!DOCTYPE html>
   <html lang="ko">
   <head>
@@ -157,7 +162,10 @@ app.post('/api/portfolios', async (req, res) => {
         fs.mkdirSync('public/portfolios', { recursive: true });
       }
   
+      console.log("🚀 uploadToS3() 호출 직전");
       const s3Url = await uploadToS3(filename, htmlContent);
+
+      console.log("✅ S3 업로드 완료:", s3Url);
 
       // MongoDB에 메타데이터 저장
       const newPortfolio = new Portfolio({
