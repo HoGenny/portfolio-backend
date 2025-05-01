@@ -160,7 +160,7 @@ app.post('/api/portfolios', async (req, res) => {
         filename,
         title: name,
         bio,
-        rul: s3Url
+        url: s3Url
       });
       await newPortfolio.save();
       
