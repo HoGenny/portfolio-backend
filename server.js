@@ -11,9 +11,11 @@ const AWS = require('aws-sdk');
 
 // 모델 불러오기
 const Portfolio = require('./models/Portfolio');
+const User = require('./models/User');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
 const s3 = new AWS.S3({
   region: process.env.AWS_REGION
 });
@@ -43,8 +45,6 @@ app.listen(PORT, () => {
 
 async function uploadToS3(filename, htmlContent) {
   console.log("🚨 uploadToS3 실행됨");
-
-  // 그리고 여기에 변수 로그
   console.log("🚨 process.env.S3_BUCKET_NAME:", `"${process.env.S3_BUCKET_NAME}"`);
 
   const params = {
@@ -52,7 +52,6 @@ async function uploadToS3(filename, htmlContent) {
     Key: `portfolios/${filename}`,
     Body: htmlContent,
     ContentType: 'text/html',
-    //ACL: 'public-read' // 공개 URL로 접근 가능하게
   };
 
   await s3.putObject(params).promise();
@@ -60,6 +59,7 @@ async function uploadToS3(filename, htmlContent) {
   return `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/portfolios/${filename}`;
 }
 
+// API
 
 // 포트폴리오 저장 API
 app.post('/api/portfolios', async (req, res) => {
@@ -71,40 +71,42 @@ app.post('/api/portfolios', async (req, res) => {
       if (!name || !bio || !skills || !projects || !email) {
         return res.status(400).json({ message: '필수 입력값이 부족합니다.' });
       }
-      
       console.log("✅ 필드 통과, HTML 생성 시작");
 
-      const htmlContent = `<!DOCTYPE html>
-  <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>${name}의 포트폴리오</title>
-    <style>
-      :root {
-        --bg-color: #ffffff;
-        --text-color: #1e1e1e;
-        --primary-blue: #3182f6;
-        --light-blue: #eff6ff;
-        --shadow: 0 8px 20px rgba(49, 130, 246, 0.1);
-      }
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      html, body { height: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); scroll-behavior: smooth; overflow-y: scroll; scroll-snap-type: y mandatory; }
-      section { height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; scroll-snap-align: start; opacity: 0; transform: translateY(60px); transition: opacity 0.8s ease, transform 0.8s ease; padding: 2rem; }
-      section.visible { opacity: 1; transform: translateY(0); }
-      .section-title { font-size: 2.2rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 2rem; }
-      .hero { background: linear-gradient(to right, #dbeafe, #eff6ff); box-shadow: var(--shadow); }
-      .hero h1 { font-size: 3rem; color: var(--primary-blue); margin-bottom: 1rem; }
-      .hero p { font-size: 1.3rem; color: #333; max-width: 600px; }
-      .hero .scroll-icon { font-size: 2.5rem; margin-top: 2.5rem; animation: bounce 1.5s infinite; color: var(--primary-blue); }
-      @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-      .tags span, .skills div, .quests div { display: inline-block; background: var(--light-blue); padding: 0.6rem 1rem; margin: 0.5rem; border-radius: 999px; box-shadow: var(--shadow); }
-      .timeline-item { text-align: left; border-left: 4px solid var(--primary-blue); padding-left: 1rem; background: #f9fafe; margin-bottom: 2rem; padding: 1rem; border-radius: 8px; box-shadow: var(--shadow); }
-      .links a { display: inline-block; margin: 0.5rem 1rem; color: var(--primary-blue); text-decoration: none; font-weight: 500; font-size: 1.1rem; }
-      .links a:hover { text-decoration: underline; }
-      .footer { font-size: 1rem; color: #666; margin-top: 2rem; }
-    </style>
-  </head>
+      // 템플릿 맞춰 HTML 생성
+      const htmlContent = 
+      `<!DOCTYPE html>
+      <html lang="ko">
+      <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>${name}의 포트폴리오</title>
+        <style>
+          :root {
+            --bg-color: #ffffff;
+            --text-color: #1e1e1e;
+            --primary-blue: #3182f6;
+            --light-blue: #eff6ff;
+            --shadow: 0 8px 20px rgba(49, 130, 246, 0.1);
+          }
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          html, body { height: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); scroll-behavior: smooth; overflow-y: scroll; scroll-snap-type: y mandatory; }
+          section { height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; scroll-snap-align: start; opacity: 0; transform: translateY(60px); transition: opacity 0.8s ease, transform 0.8s ease; padding: 2rem; }
+          section.visible { opacity: 1; transform: translateY(0); }
+          .section-title { font-size: 2.2rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 2rem; }
+          .hero { background: linear-gradient(to right, #dbeafe, #eff6ff); box-shadow: var(--shadow); }
+          .hero h1 { font-size: 3rem; color: var(--primary-blue); margin-bottom: 1rem; }
+          .hero p { font-size: 1.3rem; color: #333; max-width: 600px; }
+          .hero .scroll-icon { font-size: 2.5rem; margin-top: 2.5rem; animation: bounce 1.5s infinite; color: var(--primary-blue); }
+          @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+          .tags span, .skills div, .quests div { display: inline-block; background: var(--light-blue); padding: 0.6rem 1rem; margin: 0.5rem; border-radius: 999px; box-shadow: var(--shadow); }
+          .timeline-item { text-align: left; border-left: 4px solid var(--primary-blue); padding-left: 1rem; background: #f9fafe; margin-bottom: 2rem; padding: 1rem; border-radius: 8px; box-shadow: var(--shadow); }
+          .links a { display: inline-block; margin: 0.5rem 1rem; color: var(--primary-blue); text-decoration: none; font-weight: 500; font-size: 1.1rem; }
+          .links a:hover { text-decoration: underline; }
+          .footer { font-size: 1rem; color: #666; margin-top: 2rem; }
+        </style>
+    </head>
+
   <body>
     <section class="hero">
       <h1>코드를 모험하다, ${name}입니다.</h1>
@@ -211,11 +213,12 @@ app.get('/api/portfolios', async (req, res) => {
     const mapped = results.map(p => {
       const fullPath = path.join(__dirname, 'public/portfolios', p.filename);
       const thumbnail = extractThumbnail(fullPath);
+      const url = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/portfolios/${p.filename}`;
       return {
         filename: p.filename,
         title: p.title,
         bio: p.bio,
-        url: s3Url,
+        url,
         thumbnail: thumbnail || '/static/images/default-thumbnail.png'
       };
     });
@@ -229,8 +232,6 @@ app.get('/api/portfolios', async (req, res) => {
 
 
 // 회원가입 API
-const User = require('./models/User');
-
 app.post('/users/signup', async (req, res) => {
   try {
     const { username, password, realname, birthdate } = req.body;
