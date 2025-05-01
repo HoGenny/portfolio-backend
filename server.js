@@ -70,6 +70,7 @@ app.post('/api/portfolios', async (req, res) => {
 
   try {
     const { template, ...data } = req.body;
+    const templateName = template || 'template1.html'
     const { name, bio, skills, projects, email } = data;
 
     if (!name || !bio || !skills || !projects || !email) {
