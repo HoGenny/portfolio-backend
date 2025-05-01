@@ -1,4 +1,5 @@
 // server.js
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const fs = require('fs');
@@ -10,7 +11,6 @@ const AWS = require('aws-sdk');
 
 // 모델 불러오기
 const Portfolio = require('./models/Portfolio');
-require('dotenv').config();
 
 const app = express();
 app.use(cors());
