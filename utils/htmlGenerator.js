@@ -30,4 +30,4 @@ function fallbackHtml(data) {
   return `<html><body><h1>${data.name}</h1><p>${data.bio}</p></body></html>`;
 }
 
-module.exports = generateHtmlByTemplate;
+module.exports = { generateHtmlByTemplate };
