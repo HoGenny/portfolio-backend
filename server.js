@@ -365,3 +365,7 @@ app.post('/upload-profile', upload.single('profilePic'), (req, res) => {
     res.json({ message: '업로드 성공', url: fileUrl });
   });
   
+
+
+console.log("✅ S3 Bucket:", `"${process.env.S3_BUCKET_NAME}"`);
+console.log("✅ All env:", process.env);
