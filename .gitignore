@@ -4,3 +4,4 @@ node_modules/
 *.log
 /public/portfolios/*
 !/public/portfolios/.gitkeep
+echo ".env" >> .gitignore

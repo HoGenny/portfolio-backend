@@ -6,13 +6,18 @@ const path = require('path');
 const cheerio = require('cheerio');
 const multer = require('multer');
 const cors = require('cors');
+const AWS = require('aws-sdk');
 
 // 모델 불러오기
 const Portfolio = require('./models/Portfolio');
+require('dotenv').config();
 
 const app = express();
 app.use(cors());
 const PORT = 3000;
+const s3 = new AWS.S3({
+  region: process.env.AWS_REGION
+});
 
 // MongoDB 연결
 mongoose.connect('mongodb+srv://tyui3024:Hojin9024%40@cluster0.uwdfwq5.mongodb.net/mycms?retryWrites=true&w=majority', {
@@ -35,6 +40,21 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`http://localhost:${PORT} 에서 서버 실행 중`);
 });
+
+async function uploadToS3(filename, htmlContent) {
+  const params = {
+    Bucket: process.env.S3_BUCKET_NAME,
+    Key: `portfolios/${filename}`,
+    Body: htmlContent,
+    ContentType: 'text/html',
+    ACL: 'public-read' // 공개 URL로 접근 가능하게
+  };
+
+  await s3.putObject(params).promise();
+
+  return `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/portfolios/${filename}`;
+}
+
 
 // 포트폴리오 저장 API
 app.post('/api/portfolios', async (req, res) => {
@@ -132,14 +152,15 @@ app.post('/api/portfolios', async (req, res) => {
         fs.mkdirSync('public/portfolios', { recursive: true });
       }
   
-      fs.writeFileSync(filePath, htmlContent);
+      const s3Url = await uploadToS3(filename, htmlContent);
 
       // MongoDB에 메타데이터 저장
       const newPortfolio = new Portfolio({
         username,
         filename,
         title: name,
-        bio
+        bio,
+        rul: s3Url
       });
       await newPortfolio.save();
       
