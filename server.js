@@ -42,8 +42,10 @@ app.listen(PORT, () => {
 });
 
 async function uploadToS3(filename, htmlContent) {
-  console.log("✅ S3 Bucket:", `"${process.env.S3_BUCKET_NAME}"`);
-  console.log("✅ All env:", process.env);
+  console.log("🚨 uploadToS3 실행됨");
+
+  // 그리고 여기에 변수 로그
+  console.log("🚨 process.env.S3_BUCKET_NAME:", `"${process.env.S3_BUCKET_NAME}"`);
 
   const params = {
     Bucket: process.env.S3_BUCKET_NAME,
