@@ -215,6 +215,7 @@ app.get('/api/portfolios', async (req, res) => {
         filename: p.filename,
         title: p.title,
         bio: p.bio,
+        url: s3Url,
         thumbnail: thumbnail || '/static/images/default-thumbnail.png'
       };
     });
