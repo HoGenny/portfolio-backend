@@ -14,7 +14,7 @@ const Portfolio = require('./models/Portfolio');
 
 const app = express();
 app.use(cors());
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const s3 = new AWS.S3({
   region: process.env.AWS_REGION
 });
