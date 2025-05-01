@@ -13,7 +13,6 @@ const AWS = require('aws-sdk');
 const Portfolio = require('./models/Portfolio');
 
 const app = express();
-app.use(cors());
 const PORT = process.env.PORT || 3000;
 const s3 = new AWS.S3({
   region: process.env.AWS_REGION
@@ -28,6 +27,7 @@ mongoose.connect('mongodb+srv://tyui3024:Hojin9024%40@cluster0.uwdfwq5.mongodb.n
 .catch(err => console.error('❌ MongoDB 연결 실패', err));
 
 // 미들웨어
+app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
