@@ -8,7 +8,7 @@ const cheerio = require('cheerio');
 const multer = require('multer');
 const cors = require('cors');
 const AWS = require('aws-sdk');
-const generateHtmlByTemplate = require('/utils/htmlGenerator');
+const generateHtmlByTemplate = require('./utils/htmlGenerator');
 
 
 // 모델 불러오기
