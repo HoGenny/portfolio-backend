@@ -8,6 +8,8 @@ const cheerio = require('cheerio');
 const multer = require('multer');
 const cors = require('cors');
 const AWS = require('aws-sdk');
+const generateHtmlByTemplate = require('/utils/htmlGenerator');
+
 
 // 모델 불러오기
 const Portfolio = require('./models/Portfolio');
@@ -62,129 +64,47 @@ async function uploadToS3(filename, htmlContent) {
 // API
 
 // 포트폴리오 저장 API
+const generateHtmlByTemplate = require('./utils/htmlGenerator');
+
 app.post('/api/portfolios', async (req, res) => {
-    console.log("📨 POST /api/portfolios 진입");
-    console.log("📦 받은 데이터:", req.body);
+  console.log("📨 POST /api/portfolios 진입");
+  console.log("📦 받은 데이터:", req.body);
 
-    try {
-      const { username, name, bio, skills, projects, email, github, blog, message } = req.body;
-      if (!name || !bio || !skills || !projects || !email) {
-        return res.status(400).json({ message: '필수 입력값이 부족합니다.' });
-      }
-      console.log("✅ 필드 통과, HTML 생성 시작");
+  try {
+    const { template, ...data } = req.body;
+    const { name, bio, skills, projects, email } = data;
 
-      // 템플릿 맞춰 HTML 생성
-      const htmlContent = 
-      `<!DOCTYPE html>
-      <html lang="ko">
-      <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>${name}의 포트폴리오</title>
-        <style>
-          :root {
-            --bg-color: #ffffff;
-            --text-color: #1e1e1e;
-            --primary-blue: #3182f6;
-            --light-blue: #eff6ff;
-            --shadow: 0 8px 20px rgba(49, 130, 246, 0.1);
-          }
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          html, body { height: 100%; font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); scroll-behavior: smooth; overflow-y: scroll; scroll-snap-type: y mandatory; }
-          section { height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; scroll-snap-align: start; opacity: 0; transform: translateY(60px); transition: opacity 0.8s ease, transform 0.8s ease; padding: 2rem; }
-          section.visible { opacity: 1; transform: translateY(0); }
-          .section-title { font-size: 2.2rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 2rem; }
-          .hero { background: linear-gradient(to right, #dbeafe, #eff6ff); box-shadow: var(--shadow); }
-          .hero h1 { font-size: 3rem; color: var(--primary-blue); margin-bottom: 1rem; }
-          .hero p { font-size: 1.3rem; color: #333; max-width: 600px; }
-          .hero .scroll-icon { font-size: 2.5rem; margin-top: 2.5rem; animation: bounce 1.5s infinite; color: var(--primary-blue); }
-          @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-          .tags span, .skills div, .quests div { display: inline-block; background: var(--light-blue); padding: 0.6rem 1rem; margin: 0.5rem; border-radius: 999px; box-shadow: var(--shadow); }
-          .timeline-item { text-align: left; border-left: 4px solid var(--primary-blue); padding-left: 1rem; background: #f9fafe; margin-bottom: 2rem; padding: 1rem; border-radius: 8px; box-shadow: var(--shadow); }
-          .links a { display: inline-block; margin: 0.5rem 1rem; color: var(--primary-blue); text-decoration: none; font-weight: 500; font-size: 1.1rem; }
-          .links a:hover { text-decoration: underline; }
-          .footer { font-size: 1rem; color: #666; margin-top: 2rem; }
-        </style>
-    </head>
-
-  <body>
-    <section class="hero">
-      <h1>코드를 모험하다, ${name}입니다.</h1>
-      <p>${bio}</p>
-      <div class="scroll-icon">⬇️</div>
-    </section>
-  
-    <section>
-      <div class="section-title">개발자 DNA</div>
-      <div class="tags">
-        ${skills.map(s => `<span>${s}</span>`).join('')}
-      </div>
-    </section>
-  
-    <section>
-      <div class="section-title">🚀 프로젝트 여정</div>
-      <div class="section-content">
-        ${projects.map(p => `<div class="timeline-item">${p}</div>`).join('')}
-      </div>
-    </section>
-  
-    <section>
-      <div class="section-title">📬 나와 연결하기</div>
-      <div class="links">
-        <a href="mailto:${email}">이메일</a>
-        ${github ? `<a href="${github}" target="_blank">GitHub</a>` : ""}
-        ${blog ? `<a href="${blog}" target="_blank">블로그</a>` : ""}
-      </div>
-    </section>
-  
-    <section class="footer">
-      <p>“${message}”</p>
-    </section>
-  
-    <script>
-      const sections = document.querySelectorAll("section");
-      const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("visible");
-          }
-        });
-      }, { threshold: 0.2 });
-      sections.forEach(section => observer.observe(section));
-    </script>
-  </body>
-  </html>`;
-  
-      const timestamp = Date.now();
-      const safeName = name.replace(/\s/g, '_');
-      const filename = `${timestamp}_${safeName}.html`;
-      const filePath = `public/portfolios/${filename}`;
-  
-      if (!fs.existsSync('public/portfolios')) {
-        fs.mkdirSync('public/portfolios', { recursive: true });
-      }
-  
-      console.log("🚀 uploadToS3() 호출 직전");
-      const s3Url = await uploadToS3(filename, htmlContent);
-
-      console.log("✅ S3 업로드 완료:", s3Url);
-
-      // MongoDB에 메타데이터 저장
-      const newPortfolio = new Portfolio({
-        username,
-        filename,
-        title: name,
-        bio,
-        url: s3Url
-      });
-      await newPortfolio.save();
-      
-      res.json({ message: '포트폴리오가 생성되었습니다!', link: s3Url });
-    } catch (err) {
-      console.error('포트폴리오 저장 오류:', err);
-      res.status(500).json({ message: '서버 에러가 발생했습니다.' });
+    if (!name || !bio || !skills || !projects || !email) {
+      return res.status(400).json({ message: '필수 입력값이 부족합니다.' });
     }
-  });
+
+    console.log("✅ 필드 통과, HTML 생성 시작");
+
+    const htmlContent = generateHtmlByTemplate(template, data); // ✅ 핵심 변경
+    const timestamp = Date.now();
+    const safeName = name.replace(/\\s/g, '_');
+    const filename = `${timestamp}_${safeName}.html`;
+
+    const s3Url = await uploadToS3(filename, htmlContent); // 그대로 유지
+
+    // MongoDB 저장 등 이후 작업도 동일
+    const newPortfolio = new Portfolio({
+      username: data.username,
+      filename,
+      title: name,
+      bio,
+      url: s3Url
+    });
+    await newPortfolio.save();
+
+    res.json({ message: '포트폴리오 생성 완료!', link: s3Url });
+
+  } catch (err) {
+    console.error('포트폴리오 저장 오류:', err);
+    res.status(500).json({ message: '서버 에러가 발생했습니다.' });
+  }
+});
+
   
 
 // 썸네일 자동 추출 + 목록 API

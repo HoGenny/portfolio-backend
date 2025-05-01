@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>홍길동의 탐험형 포트폴리오</title>
+  <style>
+    :root {
+      --bg-color: #111;
+      --text-color: #fff;
+      --card-bg: #222;
+      --accent-color: #4fd1c5;
+    }
+    .light-theme {
+      --bg-color: #fff;
+      --text-color: #000;
+      --card-bg: #f3f3f3;
+      --accent-color: #007acc;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      scroll-behavior: smooth;
+      overflow: hidden;
+      transition: background 0.3s, color 0.3s;
+    }
+    .section {
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      scroll-snap-align: start;
+    }
+    main {
+      height: 100vh;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+    }
+    h1, h2, h3 { margin-bottom: 1rem; }
+    .hero { background: linear-gradient(135deg, var(--bg-color), #333); }
+    .hero h1 { font-size: 3rem; }
+    .dna span { font-size: 2rem; margin: 0.5rem; display: inline-block; }
+    .timeline { width: 80%; max-width: 700px; text-align: left; }
+    .timeline-item { margin-bottom: 2rem; border-left: 2px solid #555; padding-left: 1rem; position: relative; }
+    .timeline-item::before { content: '📍'; position: absolute; left: -1rem; top: 0; }
+    .skills, .quests { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; }
+    .skill, .quest {
+      background: var(--card-bg);
+      padding: 1rem;
+      border-radius: 8px;
+      min-width: 120px;
+    }
+    .quest { border: 1px dashed #999; padding: 1rem 1.5rem; }
+    .links a {
+      margin: 0.5rem;
+      display: inline-block;
+      color: var(--accent-color);
+      text-decoration: none;
+    }
+    .links a:hover { text-decoration: underline; }
+    .footer { font-size: 0.9rem; opacity: 0.7; }
+    .egg { margin-top: 1rem; cursor: pointer; font-size: 2rem; }
+    .theme-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      padding: 0.5rem 1rem;
+      background: var(--card-bg);
+      color: var(--text-color);
+      border: 1px solid #555;
+      border-radius: 6px;
+      cursor: pointer;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="document.body.classList.toggle('light-theme')">🌙/☀️</button>
+  <main>
+    <section class="section hero">
+      <h1>코드를 모험하다, 홍길동입니다.</h1>
+      <p>나를 탐험하는 1 Page 포트폴리오</p>
+      <div style="margin-top: 3rem; font-size: 2rem;">⬇️</div>
+    </section>
+
+    <section class="section dna">
+      <h2>개발자 DNA</h2>
+      <div>
+        <span>👨‍💻 문제해결가</span>
+        <span>🧠 호기심 폭발</span>
+        <span>💡 창의적 사고</span>
+        <span>🤝 협업중심</span>
+      </div>
+    </section>
+
+    <section class="section timeline">
+      <h2>🚀 프로젝트 여정</h2>
+      <div class="timeline-item">
+        <strong>2025.01</strong> - 포트폴리오 웹사이트 제작<br>React, FastAPI 기반
+      </div>
+      <div class="timeline-item">
+        <strong>2024.07</strong> - 팀 협업 프로젝트 (FE 개발)
+      </div>
+      <div class="timeline-item">
+        <strong>2023.07</strong> - FastAPI 백엔드 인턴십 수행
+      </div>
+    </section>
+
+    <section class="section skills">
+      <h2>🛠 기술 스택</h2>
+      <div class="skill">HTML<br>⭐⭐⭐⭐⭐</div>
+      <div class="skill">CSS<br>⭐⭐⭐⭐</div>
+      <div class="skill">JavaScript<br>⭐⭐⭐</div>
+      <div class="skill">FastAPI<br>⭐⭐⭐</div>
+      <div class="skill">React<br>⭐⭐⭐</div>
+    </section>
+
+    <section class="section quests">
+      <h2>🎯 사이드 퀘스트</h2>
+      <div class="quest">FastAPI 인턴십</div>
+      <div class="quest">교내 해커톤 참여</div>
+      <div class="quest">오픈소스 커밋</div>
+    </section>
+
+    <section class="section links">
+      <h2>📬 나와 연결하기</h2>
+      <a href="mailto:hong.dev@example.com">이메일</a>
+      <a href="https://github.com/hongdev" target="_blank">GitHub</a>
+      <a href="https://blog.example.com" target="_blank">블로그</a>
+    </section>
+
+    <section class="section footer">
+      <p>“함께하면 즐거운 개발자가 되고 싶습니다.”</p>
+      <div class="egg" onclick="alert('🐱 미니 고양이가 나타났다!')">🐾 클릭해보세요</div>
+    </section>
+  </main>
+</body>
+</html>
