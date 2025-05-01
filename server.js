@@ -7,6 +7,9 @@ const cheerio = require('cheerio');
 const multer = require('multer');
 const cors = require('cors');
 
+// 모델 불러오기
+const Portfolio = require('./models/Portfolio');
+
 const app = express();
 app.use(cors());
 const PORT = 3000;
@@ -31,73 +34,6 @@ app.get('/', (req, res) => {
 // 서버 실행
 app.listen(PORT, () => {
   console.log(`http://localhost:${PORT} 에서 서버 실행 중`);
-});
-
-// 모델 불러오기
-const Post = require('./models/Post');
-
-// 게시글 API
-app.post('/posts', async (req, res) => {
-  try {
-    const { title, content } = req.body;
-    if (!title || !content) return res.status(400).json({ message: '제목과 내용을 모두 입력해야 합니다.' });
-
-    const newPost = new Post({ title, content });
-    await newPost.save();
-    res.status(201).json({ message: '글이 성공적으로 저장되었습니다.', post: newPost });
-  } catch (err) {
-    console.error('글 저장 오류:', err);
-    res.status(500).json({ message: '서버 에러가 발생했습니다.' });
-  }
-});
-
-app.get('/posts', async (req, res) => {
-  try {
-    const posts = await Post.find().sort({ createdAt: -1 });
-    res.json(posts);
-  } catch (err) {
-    console.error('글 목록 가져오기 오류:', err);
-    res.status(500).json({ message: '서버 에러가 발생했습니다.' });
-  }
-});
-
-app.get('/posts/:id', async (req, res) => {
-  try {
-    const post = await Post.findById(req.params.id);
-    if (!post) return res.status(404).json({ message: '글을 찾을 수 없습니다.' });
-    res.json(post);
-  } catch (err) {
-    console.error('글 상세 조회 오류:', err);
-    res.status(500).json({ message: '서버 에러가 발생했습니다.' });
-  }
-});
-
-app.put('/posts/:id', async (req, res) => {
-  try {
-    const { title, content } = req.body;
-    const post = await Post.findById(req.params.id);
-    if (!post) return res.status(404).json({ message: '글을 찾을 수 없습니다.' });
-
-    post.title = title || post.title;
-    post.content = content || post.content;
-    await post.save();
-
-    res.json({ message: '글이 성공적으로 수정되었습니다.', post });
-  } catch (err) {
-    console.error('글 수정 오류:', err);
-    res.status(500).json({ message: '서버 에러가 발생했습니다.' });
-  }
-});
-
-app.delete('/posts/:id', async (req, res) => {
-  try {
-    const post = await Post.findByIdAndDelete(req.params.id);
-    if (!post) return res.status(404).json({ message: '글을 찾을 수 없습니다.' });
-    res.json({ message: '글이 성공적으로 삭제되었습니다.' });
-  } catch (err) {
-    console.error('글 삭제 오류:', err);
-    res.status(500).json({ message: '서버 에러가 발생했습니다.' });
-  }
 });
 
 // 포트폴리오 저장 API
@@ -197,6 +133,16 @@ app.post('/portfolios', async (req, res) => {
       }
   
       fs.writeFileSync(filePath, htmlContent);
+
+      // MongoDB에 메타데이터 저장
+      const newPortfolio = new Portfolio({
+        username,
+        filename,
+        title: name,
+        bio
+      });
+      await newPortfolio.save();
+      
       res.json({ message: '포트폴리오가 생성되었습니다!', link: `/portfolios/${filename}` });
     } catch (err) {
       console.error('포트폴리오 저장 오류:', err);
@@ -219,29 +165,33 @@ function extractThumbnail(filePath) {
   }
 }
 
-app.get('/api/portfolios', (req, res) => {
-  const dirPath = path.join(__dirname, 'public/portfolios');
+// GET /api/portfolios?user=username
+app.get('/api/portfolios', async (req, res) => {
+  const { user } = req.query;
+  if (!user) return res.status(400).json({ message: 'user 쿼리 파라미터가 필요합니다.' });
 
-  fs.readdir(dirPath, (err, files) => {
-    if (err) {
-      console.error('폴더 읽기 오류:', err);
-      return res.status(500).json({ message: '폴더를 읽을 수 없습니다.' });
-    }
+  try {
+    const results = await Portfolio.find({ username: user }).sort({ createdAt: -1 });
 
-    const htmlFiles = files.filter(file => file.endsWith('.html'));
-    const result = htmlFiles.map(file => {
-      const fullPath = path.join(dirPath, file);
+    // 썸네일 추출
+    const mapped = results.map(p => {
+      const fullPath = path.join(__dirname, 'public/portfolios', p.filename);
       const thumbnail = extractThumbnail(fullPath);
       return {
-        filename: file,
-        thumbnail: thumbnail || '/static/images/default-thumbnail.png',
-        title: file.replace('.html', '')
+        filename: p.filename,
+        title: p.title,
+        bio: p.bio,
+        thumbnail: thumbnail || '/static/images/default-thumbnail.png'
       };
     });
 
-    res.json(result);
-  });
+    res.json(mapped);
+  } catch (err) {
+    console.error('포트폴리오 목록 조회 실패:', err);
+    res.status(500).json({ message: '서버 오류' });
+  }
 });
+
 
 // 회원가입 API
 const User = require('./models/User');
