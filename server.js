@@ -64,8 +64,6 @@ async function uploadToS3(filename, htmlContent) {
 // API
 
 // 포트폴리오 저장 API
-const generateHtmlByTemplate = require('./utils/htmlGenerator');
-
 app.post('/api/portfolios', async (req, res) => {
   console.log("📨 POST /api/portfolios 진입");
   console.log("📦 받은 데이터:", req.body);
