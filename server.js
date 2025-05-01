@@ -223,6 +223,8 @@ app.delete('/api/portfolios/:filename', async (req, res) => {
   const params = {
     Bucket: process.env.S3_BUCKET_NAME,
     Key: `portfolios/${filename}`,
+    Body: htmlContent,
+    ContentType: 'text/html'
   };
 
   try {
