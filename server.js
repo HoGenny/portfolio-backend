@@ -243,6 +243,7 @@ app.delete('/api/portfolios/:filename', async (req, res) => {
 // 포트폴리오 내용 불러오기
 app.get('/api/portfolios/:filename', async (req, res) => {
   const filename = req.params.filename;
+  console.log("📥 S3에서 불러올 파일:", filename);
 
   const params = {
     Bucket: process.env.S3_BUCKET_NAME,
