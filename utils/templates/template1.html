@@ -1,21 +1,208 @@
 <!DOCTYPE html>
-<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${name}의 포트폴리오</title>
-<style>
-  body { font-family: 'Segoe UI', sans-serif; margin: 0; }
-  section { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; scroll-snap-align: start; text-align: center; padding: 2rem; }
-  .section-title { font-size: 2rem; color: #3182f6; margin-bottom: 1rem; }
-  .tags span, .skills div, .quests div { margin: 0.4rem; padding: 0.6rem 1rem; background: #eff6ff; border-radius: 10px; }
-  a { color: #3182f6; text-decoration: none; margin: 0 0.5rem; }
-</style></head><body>
-  <section class="hero"><h1>코드를 모험하다, ${name}입니다.</h1><p>${bio}</p></section>
-  <section><div class="section-title">개발자 DNA</div><div class="tags">${skills.map(s => `<span>${s}</span>`).join("")}</div></section>
-  <section><div class="section-title">프로젝트 여정</div>${projects.map(p => `<div class="timeline-item">${p}</div>`).join("")}</section>
-  <section><div class="section-title">📬 나와 연결하기</div>
-    <div class="links">
-      <a href="mailto:${email}">이메일</a>
-      ${github ? `<a href="${github}" target="_blank">GitHub</a>` : ""}
-      ${blog ? `<a href="${blog}" target="_blank">블로그</a>` : ""}
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{name}}의 포트폴리오</title>
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #1e1e1e;
+      --primary-blue: #3182f6;
+      --light-blue: #eff6ff;
+      --shadow: 0 8px 20px rgba(49, 130, 246, 0.1);
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      height: 100%;
+      font-family: 'Apple SD Gothic Neo', 'Segoe UI', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      scroll-behavior: smooth;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+    }
+    section {
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      scroll-snap-align: start;
+      opacity: 0;
+      transform: translateY(60px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+      padding: 2rem;
+    }
+    section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .section-title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--primary-blue);
+      margin-bottom: 2rem;
+    }
+    .hero {
+      background: linear-gradient(to right, #dbeafe, #eff6ff);
+      box-shadow: var(--shadow);
+    }
+    .hero h1 {
+      font-size: 3rem;
+      color: var(--primary-blue);
+      margin-bottom: 1rem;
+    }
+    .hero p {
+      font-size: 1.3rem;
+      color: #333;
+      max-width: 600px;
+    }
+    .hero .scroll-icon {
+      font-size: 2.5rem;
+      margin-top: 2.5rem;
+      animation: bounce 1.5s infinite;
+      color: var(--primary-blue);
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .section-content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .tags span {
+      display: inline-block;
+      margin: 0.5rem;
+      font-size: 1.2rem;
+      background-color: var(--light-blue);
+      padding: 0.4rem 0.8rem;
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+    }
+    .timeline-item {
+      text-align: left;
+      border-left: 4px solid var(--primary-blue);
+      padding-left: 1rem;
+      margin-bottom: 2rem;
+      background-color: #f9fafe;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+    .skills, .quests {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+    }
+    .skill, .quest {
+      background: var(--light-blue);
+      color: var(--text-color);
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      font-weight: 500;
+      box-shadow: var(--shadow);
+      transition: transform 0.3s ease;
+    }
+    .skill:hover, .quest:hover {
+      transform: translateY(-5px);
+    }
+    .links a {
+      display: inline-block;
+      margin: 0.5rem 1rem;
+      color: var(--primary-blue);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1.1rem;
+    }
+    .links a:hover {
+      text-decoration: underline;
+    }
+    .footer {
+      font-size: 1rem;
+      color: #666;
+      margin-top: 2rem;
+    }
+    .egg {
+      margin-top: 1rem;
+      cursor: pointer;
+      font-size: 2rem;
+      color: var(--primary-blue);
+    }
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <h1>코드를 모험하다, {{name}}입니다.</h1>
+    <p>{{bio}}</p>
+    <div class="scroll-icon">⬇️</div>
+  </section>
+
+  <section>
+    <div class="section-title">개발자 DNA</div>
+    <div class="tags">
+      <span>👨‍💻 문제해결가</span>
+      <span>🧠 호기심 폭발</span>
+      <span>💡 창의적 사고</span>
+      <span>🤝 협업중심</span>
     </div>
   </section>
-  <section class="footer"><p>${message}</p></section>
-</body></html>`;
+
+  <section>
+    <div class="section-title">🚀 프로젝트 여정</div>
+    <div class="section-content">
+      <ul>
+        {{projects}}
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">🛠 기술 스택</div>
+    <div class="skills">
+      {{skills}}
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">🎯 사이드 퀘스트</div>
+    <div class="quests">
+      {{quests}}
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">📬 나와 연결하기</div>
+    <div class="links">
+      <a href="mailto:{{email}}">이메일</a>
+      <a href="{{github}}" target="_blank">GitHub</a>
+      <a href="{{blog}}" target="_blank">블로그</a>
+    </div>
+  </section>
+
+  <section class="footer">
+    <p>“{{message}}”</p>
+  </section>
+
+  <script>
+    const sections = document.querySelectorAll("section");
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+        }
+      });
+    }, { threshold: 0.2 });
+
+    sections.forEach(section => observer.observe(section));
+  </script>
+</body>
+</html>
